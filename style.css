@@ -1,0 +1,254 @@
+@import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&display=swap');
+
+:root {
+    --primary-blue: #0066ff;
+    --text-color: #333333;
+    --glass-bg: rgba(255, 255, 255, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.6);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #ffffff;
+    color: var(--text-color);
+    min-height: 100vh;
+    overflow: hidden;
+    position: relative;
+}
+
+/* --- Pond Splashes (Blobs) --- */
+.blob {
+    position: absolute;
+    filter: blur(40px);
+    z-index: -1;
+    animation: morph 12s ease-in-out infinite both alternate;
+}
+
+.purple-blob {
+    top: -10%;
+    right: -5%;
+    width: 60vw;
+    height: 60vw;
+    background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+}
+
+.orange-blob {
+    bottom: -15%;
+    left: -10%;
+    width: 50vw;
+    height: 50vw;
+    background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+    /* Pastel orange/peach blend */
+    background: #ffd1b3;
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    animation-delay: -4s;
+}
+
+@keyframes morph {
+    0% {
+        border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+    }
+
+    50% {
+        border-radius: 60% 40% 30% 70% / 50% 60% 40% 60%;
+    }
+
+    100% {
+        border-radius: 40% 60% 70% 30% / 60% 30% 70% 40%;
+    }
+}
+
+/* --- Base Glassmorphism Utility --- */
+.glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
+/* --- Top Navbar --- */
+.top-nav {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px;
+    height: 60px;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px;
+    z-index: 10;
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.icon-btn {
+    background: transparent;
+    border: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    color: var(--text-color);
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-btn:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.icon-btn.active {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--primary-blue);
+}
+
+/* --- Prompt Box --- */
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    width: 100%;
+}
+
+/* Replace ONLY the .prompt-box input section in your CSS with this: */
+
+.prompt-box {
+    width: 90%;
+    max-width: 750px;
+    padding: 15px 20px;
+    border-radius: 24px;
+    display: flex;
+    /* CHANGED: Align items to flex-end so buttons stay at the bottom when it expands */
+    align-items: flex-end;
+    transition: transform 0.1s ease-out, box-shadow 0.3s ease;
+    will-change: transform;
+}
+
+.prompt-box textarea {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 18px;
+    font-family: inherit;
+    color: var(--text-color);
+    padding: 10px 0;
+
+    /* NEW: Textarea specific properties for auto-expanding */
+    resize: none;
+    overflow-y: hidden;
+    max-height: 250px;
+    line-height: 1.2;
+}
+
+.prompt-box textarea::placeholder {
+    color: #999;
+}
+
+.prompt-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.action-btn,
+.send-btn {
+    background: transparent;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: all 0.2s ease;
+}
+
+.action-btn {
+    color: #666;
+}
+
+.action-btn:hover {
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--text-color);
+}
+
+.send-btn {
+    background: rgba(0, 102, 255, 0.1);
+    color: var(--primary-blue);
+}
+
+.send-btn:hover {
+    background: var(--primary-blue);
+    color: white;
+}
+
+/* --- Active Users Indicator --- */
+.active-users {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    padding: 12px 20px;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 10;
+}
+
+#user-count {
+    font-weight: 600;
+    margin-right: 4px;
+}
+
+/* Strobing Green Dot */
+.status-dot {
+    width: 10px;
+    height: 10px;
+    background-color: #22c55e;
+    /* Vibrant green */
+    border-radius: 50%;
+    margin-left: 12px;
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+    animation: pulse-halo 2s infinite cubic-bezier(0.66, 0, 0, 1);
+}
+
+@keyframes pulse-halo {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
+    }
+
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 12px rgba(34, 197, 94, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+    }
+}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAVED</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="blob purple-blob"></div>
+    <div class="blob orange-blob"></div>
+
+    <nav class="top-nav glass">
+        <div class="nav-buttons">
+            <button class="icon-btn"><i class="fas fa-bars"></i></button>
+            <button class="icon-btn active"><i class="fas fa-home"></i></button>
+            <button class="icon-btn"><i class="fas fa-compass"></i></button>
+        </div>
+        <div class="nav-profile">
+            <button class="icon-btn"><i class="fas fa-user"></i></button>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="prompt-box glass" id="tilt-box">
+            <textarea placeholder="How can I help you today?" rows="1"></textarea>
+            <div class="prompt-actions">
+                <button class="action-btn"><i class="fas fa-microphone"></i></button>
+                <button class="action-btn"><i class="fas fa-paperclip"></i></button>
+                <button class="send-btn"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </main>
+
+    <div class="active-users glass">
+        <span id="user-count">12,480</span> active users
+        <div class="status-dot"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
