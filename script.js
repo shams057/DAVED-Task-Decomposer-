@@ -103,16 +103,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             console.log("🧠 STEP 8: Successfully parsed AI data ->", data);
             
-            // Clear old tasks and show the results box
+            // 1. Build the new DOM elements first (so they are ready before showing)
             taskList.innerHTML = '';
-            resultsContainer.style.display = 'block';
             
-            // Update the energy score UI
             if(energyScore) {
                 energyScore.textContent = `${data.energy_score}/10`;
             }
 
-            // Loop through the AI's tasks and build the UI
             data.tasks.forEach(task => {
                 const li = document.createElement('li');
                 li.style.padding = '12px 15px';
@@ -137,8 +134,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 taskList.appendChild(li);
             });
 
-            console.log("✅ STEP 9: UI updated successfully!");
-            resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // 2. Trigger Outgoing Animation for the Prompt Box
+            // Clear the 3D tilt transforms first so they don't override the CSS animation
+            promptBox.style.transform = ''; 
+            promptBox.style.transition = '';
+            promptBox.classList.add('hide-animated');
+
+            // 3. Wait for the fade-out to finish, then swap elements and fade-in results
+            setTimeout(() => {
+                promptBox.style.display = 'none';
+                
+                resultsContainer.style.display = 'block';
+                resultsContainer.classList.add('show-animated');
+                
+                resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                console.log("✅ STEP 9: UI updated successfully with animations!");
+            }, 400); // 400ms matches the slideOutTop animation duration
 
         } catch (error) {
             console.error("💥 STEP 10 (ERROR): Engine failure caught ->", error);
