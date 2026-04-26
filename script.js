@@ -14,6 +14,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const backBtn          = document.getElementById('back-btn');
 
     let totalPoints = 0;
+    // Track current session for progress saving
+    let currentSessionId  = null;
+    let currentTasksState = [];
 
     // --- PARALLAX EFFECT on feeling box ---
     let mouseX = 0, mouseY = 0;
@@ -25,12 +28,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function animateParallax() {
         targetX = lerp(targetX, mouseX, 0.07);
         targetY = lerp(targetY, mouseY, 0.07);
-
         const dx = targetX - 0.5;
         const dy = targetY - 0.5;
-
         feelingBox.style.transform = `translate(${dx * 18}px, ${dy * 10}px)`;
-
         rafId = requestAnimationFrame(animateParallax);
     }
 
@@ -44,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
         cancelAnimationFrame(rafId);
         rafId = null;
         mouseX = 0.5; mouseY = 0.5;
-        // Let it ease back
         function easeBack() {
             targetX = lerp(targetX, 0.5, 0.07);
             targetY = lerp(targetY, 0.5, 0.07);
@@ -61,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
         rafId = requestAnimationFrame(easeBack);
     });
 
-    // --- TILT EFFECT (on tiltBox only) ---
+    // --- TILT EFFECT ---
     tiltBox.addEventListener('mousemove', (e) => {
         const rect = tiltBox.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -78,13 +77,12 @@ document.addEventListener('DOMContentLoaded', () => {
         tiltBox.style.boxShadow = '0 10px 40px rgba(0,0,0,0.06), inset 0 0 0 1px rgba(255,255,255,0.5)';
     });
 
-    // --- AUTO-EXPAND TEXTAREAS with push effect ---
+    // --- AUTO-EXPAND TEXTAREAS ---
     function autoExpand(el) {
         el.style.height = 'auto';
         el.style.height = el.scrollHeight + 'px';
     }
 
-    // On input, auto-expand AND nudge the other box
     feelingInput.addEventListener('input', () => {
         autoExpand(feelingInput);
         tiltBox.style.transition = 'transform 0.3s cubic-bezier(0.23, 1, 0.32, 1)';
@@ -98,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
     taskInput.addEventListener('input', () => {
         autoExpand(taskInput);
         feelingBox.style.transition = 'transform 0.3s cubic-bezier(0.23, 1, 0.32, 1)';
-        // Preserve parallax translate while also nudging up
         const dx = (targetX - 0.5) * 18;
         const dy = (targetY - 0.5) * 10;
         feelingBox.style.transform = `translate(${dx}px, ${dy - 4}px)`;
@@ -110,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     [feelingInput, taskInput].forEach(el => autoExpand(el));
 
-    // --- ENTER TO SEND (Shift+Enter = newline) ---
+    // --- ENTER TO SEND ---
     [feelingInput, taskInput].forEach(el => {
         el.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -139,16 +136,12 @@ document.addEventListener('DOMContentLoaded', () => {
         userCountElement.textContent = currentUsers.toLocaleString();
     }, 4500);
 
-    // --- ENERGY SCORE RENDERING (no emojis) ---
+    // --- ENERGY SCORE RENDERING ---
     function renderEnergyBadge(score) {
         let cls, label;
-        if (score < 30) {
-            cls = 'energy-low'; label = 'Low Energy';
-        } else if (score < 60) {
-            cls = 'energy-medium'; label = 'Medium Energy';
-        } else {
-            cls = 'energy-high'; label = 'High Energy';
-        }
+        if (score < 30)       { cls = 'energy-low';    label = 'Low Energy'; }
+        else if (score < 60)  { cls = 'energy-medium'; label = 'Medium Energy'; }
+        else                   { cls = 'energy-high';   label = 'High Energy'; }
         energyBadge.className = `energy-badge ${cls}`;
         energyBadge.innerHTML = `${label} <span style="opacity:0.5;font-weight:400;margin-left:4px;">(${score}/100)</span>`;
     }
@@ -161,13 +154,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- BUILD A TASK LIST ITEM ---
-    function createTaskItem(task) {
+    function createTaskItem(task, index) {
         const li = document.createElement('li');
         li.className = 'task-item' + (task.isMVE ? ' mve' : '');
         li.dataset.points = task.points || 0;
+        li.dataset.index  = index;
 
         li.innerHTML = `
-            <input type="checkbox" class="task-check" aria-label="Mark task done">
+            <input type="checkbox" class="task-check" aria-label="Mark task done" ${task.completed ? 'checked' : ''}>
             <div class="task-content">
                 <span class="task-text">${task.step}</span>
                 <div class="task-meta">
@@ -178,11 +172,19 @@ document.addEventListener('DOMContentLoaded', () => {
             <button class="task-remove" title="Remove task"><i class="fas fa-times"></i></button>
         `;
 
+        if (task.completed) li.classList.add('done');
+
         // Checkbox toggle
         const checkbox = li.querySelector('.task-check');
         checkbox.addEventListener('change', () => {
             li.classList.toggle('done', checkbox.checked);
             recalcPoints();
+            // Update the in-memory tasks state and persist
+            const idx = parseInt(li.dataset.index, 10);
+            if (!isNaN(idx) && currentTasksState[idx]) {
+                currentTasksState[idx].completed = checkbox.checked;
+            }
+            persistProgress();
         });
 
         // Remove task
@@ -195,6 +197,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         return li;
+    }
+
+    // --- PERSIST PROGRESS TO SUPABASE ---
+    async function persistProgress() {
+        if (!currentSessionId || !window.davedUser) return;
+        try {
+            await updateTaskProgress(currentSessionId, currentTasksState);
+        } catch (e) {
+            // Non-blocking — user may be offline
+            console.warn('Could not persist progress:', e);
+        }
     }
 
     // --- RECALCULATE TOTAL POINTS ---
@@ -236,7 +249,7 @@ Return ONLY: {"points": number}`;
             return parsed.points || 10;
         } catch (e) {
             console.error('AI scoring failed:', e);
-            return 10; // fallback
+            return 10;
         }
     }
 
@@ -253,25 +266,26 @@ Return ONLY: {"points": number}`;
         `;
         taskList.appendChild(form);
 
-        const input = form.querySelector('input');
+        const input      = form.querySelector('input');
         const confirmBtn = form.querySelector('.confirm-btn');
-        const cancelBtn = form.querySelector('.cancel-btn');
+        const cancelBtn  = form.querySelector('.cancel-btn');
         input.focus();
 
         async function submitNew() {
             const text = input.value.trim();
             if (!text) return;
 
-            // Show loading state
             confirmBtn.textContent = '…';
             confirmBtn.disabled = true;
             input.disabled = true;
 
-            const points = await scoreTaskWithAI(text);
-            const newTask = { step: text, isMVE: false, points };
-            const li = createTaskItem(newTask);
+            const points  = await scoreTaskWithAI(text);
+            const newTask = { step: text, isMVE: false, points, completed: false };
 
-            // Animate in
+            // Add to in-memory state
+            currentTasksState.push(newTask);
+            const li = createTaskItem(newTask, currentTasksState.length - 1);
+
             li.style.opacity = '0';
             li.style.transform = 'translateY(8px)';
             taskList.insertBefore(li, form);
@@ -281,6 +295,8 @@ Return ONLY: {"points": number}`;
                 li.style.opacity = '1';
                 li.style.transform = 'translateY(0)';
             });
+
+            persistProgress();
         }
 
         confirmBtn.addEventListener('click', submitNew);
@@ -304,6 +320,9 @@ Return ONLY: {"points": number}`;
             taskInput.value = '';
             autoExpand(feelingInput);
             autoExpand(taskInput);
+            // Reset session tracking
+            currentSessionId  = null;
+            currentTasksState = [];
             setTimeout(() => promptWrapper.classList.remove('show-animated'), 500);
         }, 400);
     });
@@ -343,10 +362,29 @@ Return ONLY: {"points": number}`;
 
             taskList.innerHTML = '';
             totalPoints = 0;
-            data.tasks.forEach(task => {
-                taskList.appendChild(createTaskItem(task));
+
+            // Initialize tasks with completed: false
+            currentTasksState = data.tasks.map(t => ({ ...t, completed: false }));
+
+            currentTasksState.forEach((task, i) => {
+                taskList.appendChild(createTaskItem(task, i));
             });
             pointsTotal.textContent = '0 pts';
+
+            // ---- Save session to Supabase (if logged in) ----
+            if (window.davedUser) {
+                try {
+                    currentSessionId = await saveTaskSession(
+                        window.davedUser.id,
+                        feeling,
+                        task,
+                        data.energy_score,
+                        currentTasksState
+                    );
+                } catch (e) {
+                    console.warn('Session save failed (non-blocking):', e);
+                }
+            }
 
             promptWrapper.style.transform = '';
             promptWrapper.style.transition = '';
@@ -355,7 +393,6 @@ Return ONLY: {"points": number}`;
             setTimeout(() => {
                 promptWrapper.style.display = 'none';
                 promptWrapper.classList.remove('hide-animated');
-
                 resultsContainer.style.display = 'block';
                 resultsContainer.classList.add('show-animated');
                 resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
