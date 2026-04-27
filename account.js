@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     contentEl.style.display = 'block';
     await Promise.all([loadProfile(user), loadHistory(user, 0)]);
     await loadStats(user);
+    await loadStreakStats(user);
     setupPagination(user);
     setupFilters();
 });
@@ -111,6 +112,69 @@ async function loadStats(user) {
     animateNumber('stat-completed', doneSessions);
 }
 
+// ============================================================
+// STREAK STATS
+// ============================================================
+async function loadStreakStats(user) {
+    try {
+        const data = await getStreakData(user.id);
+        const streak = data?.current_streak || 0;
+        const longest = data?.longest_streak || 0;
+        const usedThisMonth = (data?.freezes_month === monthStr()) ? (data?.freezes_used || 0) : 0;
+        const freezesLeft = 5 - usedThisMonth;
+
+        animateNumber('stat-streak', streak);
+
+        const metaEl = document.getElementById('streak-meta');
+        if (metaEl) {
+            metaEl.innerHTML = `
+                <span title="Longest streak">Best: ${longest}</span>
+                &bull;
+                <span title="Streak freezes left this month">❄️ ${freezesLeft}/5</span>
+            `;
+        }
+
+        // Today's points (capped at 100)
+        const todayPts = Math.min(await getTodayPoints(user.id), 100);
+        const todayEl = document.getElementById('stat-today-pts');
+        if (todayEl) todayEl.textContent = `${todayPts}/100`;
+
+        // All-time total: sum of each day's completed_points, each day capped at 100
+        const alltimePts = await getAllTimeDailyPoints(user.id);
+        animateNumber('stat-alltime-pts', alltimePts);
+
+        // Streak navbar badge
+        const badge = document.getElementById('streak-count');
+        if (badge) badge.textContent = streak;
+        const streakBtn = document.getElementById('streak-btn');
+        const activeToday = data?.last_active_date === todayUTC();
+        if (streakBtn) {
+            streakBtn.title = streak > 0
+                ? `${streak}-day streak · ${freezesLeft} freeze${freezesLeft !== 1 ? 's' : ''} left`
+                : 'No streak yet';
+            streakBtn.classList.toggle('streak-active', streak > 0 && activeToday);
+        }
+        // Streak dashboard card
+        const streakCard = document.getElementById('streak-stat-card');
+        if (streakCard) streakCard.classList.toggle('streak-active', streak > 0 && activeToday);
+    } catch (e) {
+        console.warn('Streak load failed:', e);
+    }
+}
+
+async function refreshDailyAndTotalPts() {
+    if (!window.davedUser) return;
+    try {
+        const todayPts = Math.min(await getTodayPoints(window.davedUser.id), 100);
+        const todayEl = document.getElementById('stat-today-pts');
+        if (todayEl) todayEl.textContent = `${todayPts}/100`;
+
+        const alltimePts = await getAllTimeDailyPoints(window.davedUser.id);
+        const allEl = document.getElementById('stat-alltime-pts');
+        if (allEl) allEl.textContent = alltimePts.toLocaleString();
+    } catch (e) { console.warn('refreshDailyAndTotalPts failed:', e); }
+}
+
 function animateNumber(elId, target) {
     const el = document.getElementById(elId);
     if (!el) return;
@@ -179,7 +243,6 @@ function applyFilter(sessions) {
 // ============================================================
 async function scoreStepWithAI(stepText) {
     try {
-        // Call your own backend endpoint instead of Anthropic directly
         const res = await fetch('/api/score', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -295,7 +358,7 @@ function buildSessionCard(session) {
                 renderSteps();
                 syncCache();
                 await updateTaskProgress(session.id, tasks);
-                if (window.davedUser) loadStats(window.davedUser);
+                if (window.davedUser) { loadStats(window.davedUser); refreshDailyAndTotalPts(); }
             });
         });
 
@@ -316,7 +379,7 @@ function buildSessionCard(session) {
                         renderSteps();
                         syncCache();
                         await updateTaskProgress(session.id, tasks);
-                        if (window.davedUser) loadStats(window.davedUser);
+                        if (window.davedUser) { loadStats(window.davedUser); refreshDailyAndTotalPts(); }
                     }
                 });
             });
@@ -393,7 +456,7 @@ function buildSessionCard(session) {
                     const si = allSessions.findIndex(s => s.id === session.id);
                     if (si !== -1) allSessions.splice(si, 1);
                 }, 200);
-                if (window.davedUser) loadStats(window.davedUser);
+                if (window.davedUser) { loadStats(window.davedUser); refreshDailyAndTotalPts(); }
             }
         });
     });

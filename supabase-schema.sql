@@ -201,3 +201,29 @@ create policy "Users can view own stats"
 --   public.task_sessions  → task history with JSONB steps
 --   public.user_stats     → aggregated stats per user
 -- ============================================================
+
+-- ============================================================
+-- USER STREAKS
+-- Tracks daily streak, longest streak, and freeze usage.
+-- ============================================================
+create table if not exists public.user_streaks (
+    user_id           uuid primary key references public.profiles(id) on delete cascade,
+    current_streak    int default 0,
+    longest_streak    int default 0,
+    last_active_date  date,
+    freezes_used      int default 0,       -- freezes used this month
+    freezes_month     text,                -- 'YYYY-MM' of current freeze count
+    updated_at        timestamptz default now()
+);
+
+-- RLS
+alter table public.user_streaks enable row level security;
+create policy "Users can view own streak"
+    on public.user_streaks for select
+    using (auth.uid() = user_id);
+create policy "Users can insert own streak"
+    on public.user_streaks for insert
+    with check (auth.uid() = user_id);
+create policy "Users can update own streak"
+    on public.user_streaks for update
+    using (auth.uid() = user_id);

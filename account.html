@@ -16,6 +16,10 @@
     <nav class="top-nav glass">
         <div class="nav-buttons">
             <a href="index.html" class="icon-btn" title="Back to home"><i class="fas fa-arrow-left"></i></a>
+            <button class="icon-btn streak-icon-btn" id="streak-btn" title="Your streak">
+                <i class="fas fa-fire streak-flame"></i>
+                <span class="streak-count" id="streak-count">0</span>
+            </button>
         </div>
         <div id="account" class="nav-profile">
             <button class="icon-btn" id="account-btn"><i class="fas fa-user"></i></button>
@@ -86,6 +90,28 @@
                     </div>
                     <div class="stat-value" id="stat-completed">–</div>
                     <div class="stat-label">Sessions Finished</div>
+                </div>
+                <div class="stat-card glass streak-stat-card" id="streak-stat-card">
+                    <div class="stat-icon streak-icon-inner">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <div class="stat-value" id="stat-streak">–</div>
+                    <div class="stat-label">Day Streak</div>
+                    <div class="streak-meta" id="streak-meta"></div>
+                </div>
+                <div class="stat-card glass">
+                    <div class="stat-icon" style="background:rgba(20,184,166,0.1);color:#0d9488;">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="stat-value" id="stat-today-pts">–</div>
+                    <div class="stat-label">Pts Today</div>
+                </div>
+                <div class="stat-card glass">
+                    <div class="stat-icon" style="background:rgba(99,102,241,0.1);color:#6366f1;">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="stat-value" id="stat-alltime-pts">–</div>
+                    <div class="stat-label">Total Points</div>
                 </div>
             </div>
 

@@ -18,9 +18,13 @@
 
     <nav class="top-nav glass">
         <div class="nav-buttons">
-            <button class="icon-btn"><i class="fas fa-bars"></i></button>
-            <button class="icon-btn active"><i class="fas fa-home"></i></button>
+            <a href="index.html" class="icon-btn" title="Home"><i class="fas fa-bars"></i></a>
+            <a href="index.html" class="icon-btn active" title="Home"><i class="fas fa-home"></i></a>
             <button class="icon-btn"><i class="fas fa-compass"></i></button>
+            <button class="icon-btn streak-icon-btn" id="streak-btn" title="Your streak">
+                <i class="fas fa-fire streak-flame"></i>
+                <span class="streak-count" id="streak-count">0</span>
+            </button>
         </div>
         <div id="account" class="nav-profile">
             <button class="icon-btn" id="account-btn"><i class="fas fa-user"></i></button>
@@ -42,6 +46,7 @@
                 </div>
                 <textarea id="task-input" placeholder="Describe your task…" rows="1"></textarea>
                 <div class="prompt-actions">
+                    <div id="daily-pts-badge" class="daily-pts-badge"></div>
                     <button class="action-btn"><i class="fas fa-microphone"></i></button>
                     <button class="action-btn"><i class="fas fa-paperclip"></i></button>
                     <button class="send-btn" id="send-btn"><i class="fas fa-paper-plane"></i></button>

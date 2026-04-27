@@ -576,3 +576,44 @@
     background: #333;
     box-shadow: 0 4px 14px rgba(0,0,0,0.2);
 }
+
+/* ============================================================
+   STREAK STATS CARD — account page
+   ============================================================ */
+.stats-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+}
+@media (max-width: 700px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+/* streak card — always white bg, standard card appearance */
+.streak-stat-card {
+    border: 1px solid rgba(255,255,255,0.8) !important;
+    background: rgba(255,255,255,0.5) !important;
+}
+.streak-stat-card:hover { transform: translateY(-2px); }
+
+/* flame icon — black when inactive */
+.streak-icon-inner {
+    background: rgba(0,0,0,0.05) !important;
+    color: #1a1a1a !important;
+    transition: color 0.25s ease, background 0.25s ease;
+}
+
+/* active: only the flame icon turns red */
+.streak-stat-card.streak-active .streak-icon-inner {
+    color: #dc2626 !important;
+    background: rgba(220,38,38,0.08) !important;
+}
+
+.streak-meta {
+    font-size: 11px;
+    color: #aaa;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}

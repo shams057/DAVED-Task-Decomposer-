@@ -106,9 +106,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             showError(errEl, error.message);
         } else {
             window.davedUser = (await db.auth.getUser()).data.user;
-            closeModal();
-            // Refresh navbar avatar
-            location.reload();
+            // Dispatch login event — script.js handles modal close + pending payload
+            window.dispatchEvent(new Event('davedLoggedIn'));
+            // Only reload if there's no pending task (avoids breaking the flow)
+            const hasPending = !!sessionStorage.getItem('daved_pending_payload');
+            if (!hasPending) location.reload();
         }
     });
 

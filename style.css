@@ -409,3 +409,106 @@ body {
 .show-animated {
     animation: slideInBottom 0.5s cubic-bezier(0.175,0.885,0.32,1.275) forwards;
 }
+
+/* ============================================================
+   STREAK & DAILY POINTS — added features
+   ============================================================ */
+
+/* Streak button in navbar */
+/* inactive: neutral black pill */
+.streak-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 0 12px;
+    width: auto;
+    min-width: 54px;
+    border-radius: 22px !important;
+    font-size: 13px;
+    font-weight: 700;
+    background: rgba(0,0,0,0.04) !important;
+    border: 1.5px solid rgba(0,0,0,0.1) !important;
+    color: #666 !important;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.streak-icon-btn:hover {
+    background: rgba(0,0,0,0.07) !important;
+    border-color: rgba(0,0,0,0.16) !important;
+}
+/* active (streak > 0 today): red */
+.streak-icon-btn.streak-active {
+    background: rgba(220,38,38,0.07) !important;
+    border-color: rgba(220,38,38,0.25) !important;
+    color: #dc2626 !important;
+}
+.streak-icon-btn.streak-active:hover {
+    background: rgba(220,38,38,0.12) !important;
+    border-color: rgba(220,38,38,0.4) !important;
+}
+/* flame icon in navbar — fa-fire, black inactive, red active */
+.streak-flame {
+    font-size: 13px;
+    line-height: 1;
+    color: #1a1a1a;
+    opacity: 0.5;
+    transition: color 0.2s ease, opacity 0.2s ease;
+}
+.streak-icon-btn.streak-active .streak-flame {
+    color: #dc2626;
+    opacity: 1;
+}
+.streak-count { font-size: 13px; font-weight: 800; letter-spacing: -0.02em; }
+
+/* Daily pts badge in prompt actions */
+.daily-pts-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 12px;
+    background: rgba(20,184,166,0.1);
+    color: #0d9488;
+    border: 1px solid rgba(20,184,166,0.25);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+.daily-pts-badge.low {
+    background: rgba(234,179,8,0.1);
+    color: #ca8a04;
+    border-color: rgba(234,179,8,0.3);
+}
+.daily-pts-badge.exhausted {
+    background: rgba(239,68,68,0.1);
+    color: #dc2626;
+    border-color: rgba(239,68,68,0.25);
+}
+
+/* Input validation error */
+.input-validation-msg {
+    display: none;
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.2);
+    color: #dc2626;
+    font-size: 13px;
+    padding: 10px 16px;
+    border-radius: 14px;
+    margin-top: 6px;
+    animation: slideInBottom 0.3s ease;
+}
+
+/* Login gate hint */
+.login-gate-hint {
+    display: none;
+    background: rgba(0,102,255,0.07);
+    border: 1px solid rgba(0,102,255,0.2);
+    color: #0052cc;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 10px 16px;
+    border-radius: 14px;
+    margin-top: 6px;
+    text-align: center;
+    animation: slideInBottom 0.3s ease;
+}
